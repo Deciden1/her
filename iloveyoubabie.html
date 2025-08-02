@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secret Portal</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background: black;
+      color: #0f0;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .centered {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      background: black;
+      color: #0f0;
+      border: 1px solid #0f0;
+      margin-top: 10px;
+    }
+
+    #enterBtn {
+  background-color: black;
+  color: white;
+  border: 1px solid white;
+  padding: 8px 16px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+#enterBtn:hover {
+  background-color: #222;
+}
+
+    #message {
+      margin-top: 20px;
+      font-size: 18px;
+      color: red;
+    }
+
+    body.girly {
+      background: linear-gradient(135deg, #ffd6e7, #ffe9f4);
+      color: #c71585;
+    }
+
+    canvas.heart {
+      z-index: -2;
+    }
+
+    .hearts-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Heart_corazón.svg/2048px-Heart_corazón.svg.png') no-repeat center center/contain;
+      animation: float 8s linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) scale(0.5);
+      }
+      100% {
+        transform: translateY(-10vh) scale(1);
+      }
+    }
+
+    #love-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 3px solid #ff85b3;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 500px;
+      color: #c71585;
+      font-size: 18px;
+      z-index: 10;
+      display: none;
+      box-shadow: 0 0 15px rgba(255, 133, 179, 0.5);
+      text-align: center;
+    }
+
+    #moreBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #ff85b3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #moreBtn:hover {
+      background: #ff5c9e;
+    }
+  </style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<canvas id="whiteHearts" class="heart"></canvas>
+
+<div class="centered" id="entry">
+  <div>Enter your name:</div>
+  <input type="text" id="nameInput" />
+  <button id="enterBtn">Enter</button>
+  <div id="message"></div>
+</div>
+
+<div class="hearts-bg" id="hearts"></div>
+
+<div id="love-box">
+  <div id="love-text">Aw baby i made this for you, i Love You</div>
+  <button id="moreBtn">Tell more</button>
+</div>
+
+<script>
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+
+  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth;
+
+  let letters = "アァイィウヴエェオカガキギクグケコゴサザシジスズセソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  letters = letters.split("");
+
+  let fontSize = 14;
+  let columns = canvas.width / fontSize;
+  let drops = [];
+
+  for (let x = 0; x < columns; x++) drops[x] = 1;
+
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#0F0";
+    ctx.font = fontSize + "px monospace";
+
+    for (let i = 0; i < drops.length; i++) {
+      let text = letters[Math.floor(Math.random() * letters.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+
+  setInterval(drawMatrix, 33);
+
+  const nameInput = document.getElementById('nameInput');
+  const enterBtn = document.getElementById('enterBtn');
+  const messageDiv = document.getElementById('message');
+  const heartsContainer = document.getElementById('hearts');
+  const loveText = document.getElementById('love-text');
+  const loveBox = document.getElementById('love-box');
+  const moreBtn = document.getElementById('moreBtn');
+  const entry = document.getElementById('entry');
+
+  const whiteHeartCanvas = document.getElementById('whiteHearts');
+  const whiteHeartCtx = whiteHeartCanvas.getContext('2d');
+
+  whiteHeartCanvas.width = window.innerWidth;
+  whiteHeartCanvas.height = window.innerHeight;
+
+  const whiteHearts = [];
+  for (let i = 0; i < 40; i++) {
+    whiteHearts.push({
+      x: Math.random() * whiteHeartCanvas.width,
+      y: Math.random() * whiteHeartCanvas.height,
+      size: 10 + Math.random() * 10,
+      speed: 0.3 + Math.random() * 0.7,
+      opacity: 0.3 + Math.random() * 0.5
+    });
+  }
+
+  const heartImg = new Image();
+  heartImg.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Heart_corazón.svg/2048px-Heart_corazón.svg.png";
+
+  function animateWhiteHearts() {
+    whiteHeartCtx.clearRect(0, 0, whiteHeartCanvas.width, whiteHeartCanvas.height);
+    whiteHearts.forEach(h => {
+      whiteHeartCtx.globalAlpha = h.opacity;
+      whiteHeartCtx.drawImage(heartImg, h.x, h.y, h.size, h.size);
+      h.y -= h.speed;
+      if (h.y < -20) {
+        h.y = whiteHeartCanvas.height + 20;
+        h.x = Math.random() * whiteHeartCanvas.width;
+      }
+    });
+    requestAnimationFrame(animateWhiteHearts);
+  }
+
+  const loveParagraphs = [
+    "You're the prettiest soul to walk this Earth",
+    "You're more beautiful than a thousand sunsets",
+    "Your smile is my favorite view",
+    "You light up every room you walk into",
+    "Your laugh is my favorite sound",
+    "You're the reason I believe in love",
+    "You make my world softer and warmer",
+    "You're cuter than every puppy in the world combined",
+    "Even the stars are jealous of your sparkle",
+    "You’re prettier than the moon ever was",
+    "You make my heart skip beats every single time",
+    "You’re the definition of perfect for me",
+    "You’re my favorite person, always",
+    "You're my home, my peace, my everything",
+    "You have the most caring heart",
+    "You’re effortlessly graceful",
+    "You’re my sweetest addiction",
+    "Your voice is the most soothing sound ever",
+    "You’re stronger than you think and even more beautiful for it",
+    "Your hugs are my safe space",
+    "You’re my dream come true",
+    "You make the world feel right",
+    "You’re breathtakingly gorgeous",
+    "You’re the highlight of my every day",
+    "You're all the beauty in the world in one person",
+    "Your eyes carry the universe in them",
+    "You’re every love song written",
+    "You're better than anything I ever imagined",
+    "You're the calm to my chaos",
+    "You're the most genuine person I've ever known",
+    "You’re a blessing I’ll never stop being thankful for",
+    "You're prettier than any picture could show",
+    "You're the definition of wife material",
+    "You're the standard for love",
+    "You're the softest and strongest soul in one",
+    "You're my personal sunshine",
+    "You're elegant in everything you do",
+    "You're my favorite chapter of life",
+    "You're the girl I want forever with",
+    "You're the prettiest part of my day",
+    "You’re my peace in human form",
+    "You're like poetry in motion",
+    "You're my reason to smile randomly",
+    "You're more rare than a diamond",
+    "You're everything good packed into one person",
+    "You're endlessly sweet",
+    "You're beautifully real",
+    "You're the most precious gift in my life",
+    "You’re my heartbeat",
+    "You’re art in its purest form",
+    "You're the meaning of beautiful inside and out",
+    "You're my favorite thought daily",
+    "You're God's favorite creation I swear",
+    "You’re my forever favorite",
+    "You're everything I ever needed",
+    "You're the softest part of my hard days",
+    "You're the cutest human alive",
+    "You're my favorite notification",
+    "You're the prettiest when you’re just being you",
+    "You’re more addictive than coffee",
+    "You're someone heaven was proud to make",
+    "You're the one every love story talks about",
+    "You're the meaning of real love",
+    "You're my always and forever",
+    "You're prettier than any filter or edit",
+    "You're the only good dream I never want to wake from",
+    "You're beautiful in ways the world can't explain",
+    "You're better than any poem or song",
+    "You're more magical than any fairytale",
+    "You're the best decision I've ever made",
+    "You're every shade of beautiful",
+    "You're my most loyal comfort",
+    "You're precious in ways words can't hold",
+    "You're my favorite hello and hardest goodbye",
+    "You're everything soft and sweet",
+    "You're the kindest soul I’ve known",
+    "You're the answer to every prayer I whispered",
+    "You're my girl and that’s my favorite title",
+    "You’re even cuter when you’re mad",
+    "You're loved more than you know",
+    "You're my definition of peace",
+    "You're my only one",
+    "You're the prettiest person in every room",
+    "You're always in my mind and always will be",
+    "You're the reason good exists in my life",
+    "You're my perfect",
+    "You're my muse",
+    "You're my comfort zone",
+    "You're softer than clouds",
+    "You're prettier than every model on Earth",
+    "You’re my favorite memory and future",
+    "You're more comforting than silence",
+    "You’re every shade of lovely",
+    "You're always enough, more than enough",
+    "You're prettier without makeup than anyone with it",
+    "You're the prettiest and the most powerful",
+    "You're the heartbeat to my silence",
+    "You're the prettiest wifey ever",
+    "You’re my person always",
+    "You're endlessly elegant",
+    "You're the dream I never want to wake from",
+    "You’re more beautiful than words allow",
+    "You're mine and that’s everything"
+  ];
+
+  function showHearts() {
+    for (let i = 0; i < 30; i++) {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      heart.style.left = `${Math.random() * 100}%`;
+      heart.style.animationDuration = `${5 + Math.random() * 5}s`;
+      heartsContainer.appendChild(heart);
+    }
+  }
+
+  function showLoveText() {
+    const para = loveParagraphs[Math.floor(Math.random() * loveParagraphs.length)];
+    loveText.textContent = para;
+  }
+
+  function validateName() {
+    const name = nameInput.value.trim().toLowerCase();
+    if (name === 'bb') {
+      document.body.classList.add('girly');
+      canvas.style.display = 'none';
+      entry.style.display = 'none';
+      loveBox.style.display = 'block';
+      showHearts();
+      animateWhiteHearts();
+      showLoveText();
+    } else {
+      messageDiv.textContent = 'Wrong person.';
+    }
+  }
+
+  nameInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') validateName();
+  });
+
+  enterBtn.addEventListener('click', validateName);
+
+  moreBtn.addEventListener('click', showLoveText);
+</script>
+</body>
+</html>
+
